@@ -21,7 +21,9 @@ One of the output exports of the CloudFormation script should be the public URL 
 - S3 Read-only role
 - VPC
 - Subnets (2 x public, 2 x private)
-
+- Internet Gateway attached to the VPC
+- NAT Gateways with Elastic IPs (x2)
+-
 
 
 ## To trigger stack creation:

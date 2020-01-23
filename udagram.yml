@@ -127,6 +127,60 @@ Resources:
         - Key: EnvironmentName
           Value: !Sub ${EnvironmentName}
 
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Elastic IP address from AWS's address pool
+  EIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+    DependsOn: AttachGateway
+
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc # Set to vpc to allocate the address for use with instances in a VPC
+    DependsOn: AttachGateway
+
+  # a Network Address Translation (NAT) gateway allows
+  # instances in a private subnet to connect to the Internet or to other AWS services,
+  # but prevents the Internet from initiating a connection with those instances
+  NATGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      # allocation ID of an Elastic IP address to associate with the NAT gateway
+      AllocationId: !GetAtt EIP1.AllocationId
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName} 
+
+  NATGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      AllocationId: !GetAtt EIP2.AllocationId
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName} 
+
 
   # stuff for LaunchConfiguration:
     #!/bin/bash
