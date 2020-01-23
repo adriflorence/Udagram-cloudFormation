@@ -27,8 +27,16 @@ Parameters:
   PublicSubnet2CIDR:
     Type: String
 
+  AutoScalingGroupMinSize:
+    Type: String
+
+  AutoScalingGroupMaxSize:
+    Type: String
+
 
 Resources:
+
+  # Profile with a read-only role
 
   S3ReadOnlyEC2:
     Type: AWS::IAM::Role
@@ -262,12 +270,84 @@ Resources:
       SubnetId: !Ref PrivateSubnet2
 
 
-  # stuff for LaunchConfiguration:
-    #!/bin/bash
-    # apt-get update -y
-    # apt-get install unzip awscli -y
-    # apt-get install apache2 -y
-    # systemctl start apache2.service
-    # cd /var/www/html
-    # aws s3 cp s3://udacity-demo-1/udacity.zip .
-    # unzip -o udacity.zip
+  # servers
+  
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for VPC
+      # outbound rule for a security group
+      # permits instances to send traffic
+      # to the specified IPv4 or IPv6 CIDR address ranges
+      SecurityGroupEgress:
+        - IpProtocol: "tcp"
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: "0.0.0.0/0"
+      # inbound rule for a security group
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+      VpcId: !Ref VPC   # attached to the vpc
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: "ami-0713f98de93617bb4"
+      InstanceType: "t3.small"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install unzip awscli -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          aws s3 cp s3://udacity-demo-1/udacity.zip .
+          unzip -o udacity.zip
+      IamInstanceProfile: !Ref ProfileWithRoles
+      SecurityGroups:
+        - Ref: SecurityGroup
+
+      # Each instance that is launched has an associated root device volume
+      # either an Amazon EBS volume or an instance store volume.
+      # Block device mappings can specify additional EBS volumes
+      # or instance store volumes to attach to an instance when it is launched.
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: '10' # 10GB disk space
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      MinSize: !Sub ${AutoScalingGroupMinSize}
+      MaxSize: !Sub ${AutoScalingGroupMaxSize}
+      HealthCheckGracePeriod: 10
+      # a list of subnet IDs for a VPC
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      # a list of Amazon Resource Names
+      TargetGroupARNs:
+        - !Ref TargetGroup
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: "/"
+      HealthCheckProtocol: "HTTP"
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      Port: 80
+      Protocol: "HTTP"
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref VPC
+  
+  # load balancer
+
+  # outputs

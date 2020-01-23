@@ -26,5 +26,13 @@
   {
       "ParameterKey": "PublicSubnet2CIDR",
       "ParameterValue": "10.0.4.0/24"
+  },
+  {
+      "ParameterKey": "AutoScalingGroupMinSize",
+      "ParameterValue": "3"
+  },
+  {
+      "ParameterKey": "AutoScalingGroupMaxSize",
+      "ParameterValue": "5"
   }
 ]
