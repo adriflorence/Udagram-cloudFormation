@@ -27,7 +27,7 @@ Parameters:
   PublicSubnet2CIDR:
     Type: String
 
-    
+
 Resources:
 
   S3ReadOnlyEC2:
@@ -100,7 +100,7 @@ Resources:
           Value: !Sub ${ProjectName}
         - Key: EnvironmentName
           Value: !Sub ${EnvironmentName}
-  
+
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -180,6 +180,86 @@ Resources:
           Value: !Sub ${ProjectName}
         - Key: EnvironmentName
           Value: !Sub ${EnvironmentName} 
+
+  # required for routes
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+    DependsOn: AttachGateway
+
+  PublicRouteSubnet1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicRouteSubnet2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  # private route tables x2
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  # private routes x2
+  PrivateRouteSubnet1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      NatGatewayId: !Ref NATGateway1
+      DestinationCidrBlock: 0.0.0.0/0
+
+  PrivateRouteSubnet2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      NatGatewayId: !Ref NATGateway2
+      DestinationCidrBlock: 0.0.0.0/0
+
+  # associate routes with private subnets
+  PrivateRouteSubnet1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateRouteSubnet2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
 
 
   # stuff for LaunchConfiguration:
