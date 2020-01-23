@@ -15,6 +15,18 @@ Parameters:
   VPCCidrBlock:
     Type: String
 
+  PrivateSubnet1CIDR:
+    Type: String
+
+  PrivateSubnet2CIDR:
+    Type: String
+
+  PublicSubnet1CIDR:
+    Type: String
+
+  PublicSubnet2CIDR:
+    Type: String
+
     
 Resources:
 
@@ -62,13 +74,66 @@ Resources:
         -
           Key: EnvironmentName
           Value: !Sub ${EnvironmentName}
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
   
-        # stuff for LaunchConfiguration:
-          #!/bin/bash
-          # apt-get update -y
-          # apt-get install unzip awscli -y
-          # apt-get install apache2 -y
-          # systemctl start apache2.service
-          # cd /var/www/html
-          # aws s3 cp s3://udacity-demo-1/udacity.zip .
-          # unzip -o udacity.zip
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet1CIDR
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet2CIDR
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      Tags: 
+        - Key: ProjectName
+          Value: !Sub ${ProjectName}
+        - Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+
+
+  # stuff for LaunchConfiguration:
+    #!/bin/bash
+    # apt-get update -y
+    # apt-get install unzip awscli -y
+    # apt-get install apache2 -y
+    # systemctl start apache2.service
+    # cd /var/www/html
+    # aws s3 cp s3://udacity-demo-1/udacity.zip .
+    # unzip -o udacity.zip
