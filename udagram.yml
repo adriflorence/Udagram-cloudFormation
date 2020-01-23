@@ -402,4 +402,14 @@ Resources:
       Priority: 1
     
   # outputs
+    
+Outputs:
+    
+      WebSiteAddress:
+        Description: Public address
+        Value: !Join [ "://", [ "http", !GetAtt LoadBalancer.DNSName ] ]
+        Export:
+          Name: PublicAddress
 
+
+# Website Address: http://Udagr-LoadB-UNP76FIC6NVH-161106560.eu-west-1.elb.amazonaws.com

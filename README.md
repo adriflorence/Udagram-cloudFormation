@@ -33,6 +33,8 @@ Log information for UserData scripts is located in this file: `cloud-init-output
 - Security Group for the VPC
 - Launch Configuration
 - Auto-scaling Group
+- Load Balancer with its security group
+- OUTPUTS: load balancer DNS Name
 
 
 ## To trigger stack creation:
