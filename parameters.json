@@ -1,0 +1,14 @@
+[  
+  {
+      "ParameterKey": "ProjectName",
+      "ParameterValue": "Udagram"
+  },
+  {
+      "ParameterKey": "EnvironmentName",
+      "ParameterValue": "Udagram"
+  },
+  {
+    "ParameterKey": "VPCCidrBlock",
+    "ParameterValue": "10.0.0.0/16"
+  }
+]

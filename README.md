@@ -1,0 +1,1 @@
+``` aws cloudformation create-stack --stack-name Udagram --region eu-west-1 --template-body file://udagram.yml --parameters file://parameters.json --capabilities CAPABILITY_NAMED_IAM ```

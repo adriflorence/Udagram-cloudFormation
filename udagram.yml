@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: >
+    Adri Forczek / Udagram 2020
+
+# can only be reference from Resources and Outputs
+Parameters:
+
+  ProjectName:
+    Type: String
+
+  EnvironmentName:
+    Type: String
+
+  VPCCidrBlock:
+    Type: String
+
+    
+Resources:
+
+  S3ReadOnlyEC2:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: S3ReadOnlyEC2
+      # trust policy that is associated with this role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "S3ReadOnlyAccess"
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                Resource: "*"
+
+  ProfileWithRoles:
+    Type: AWS::IAM::InstanceProfile
+    DependsOn: S3ReadOnlyEC2
+    Properties: 
+      Roles:
+        - !Ref S3ReadOnlyEC2
+
+  # network layer
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        -
+          Key: ProjectName
+          Value: !Sub ${ProjectName}
+        -
+          Key: EnvironmentName
+          Value: !Sub ${EnvironmentName}
+  
+        # stuff for LaunchConfiguration:
+          #!/bin/bash
+          # apt-get update -y
+          # apt-get install unzip awscli -y
+          # apt-get install apache2 -y
+          # systemctl start apache2.service
+          # cd /var/www/html
+          # aws s3 cp s3://udacity-demo-1/udacity.zip .
+          # unzip -o udacity.zip
