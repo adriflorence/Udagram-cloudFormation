@@ -45,3 +45,9 @@ Log information for UserData scripts is located in this file: `cloud-init-output
 ## To trigger stack update:
 
 ``` aws cloudformation update-stack --stack-name Udagram --region eu-west-1 --template-body file://udagram.yml --parameters file://parameters.json --capabilities CAPABILITY_NAMED_IAM ```
+
+## Possible improvements:
+
+- deploy Windows Servers instead of Linux and use PowerShell scripts to showcase Windows management skills
+- use AWS Parameter Store to save sensitive data, such as credentials to showcase attention to security
+- use CloudWatch Alarms and CloudWatch custom metrics to showcase performance and monitoring skills
